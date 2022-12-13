@@ -1,0 +1,80 @@
+body {
+    background: #ef4642;
+    color: white;
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+}
+
+h1 {
+    background-color: black;
+    color: #ef4642;
+    font-size: 40px;
+    text-align: center;
+    padding: 2rem;
+}
+
+.petition {
+    display: flex;
+}
+
+.description {
+    margin: 2rem;
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.description img {
+    width: 75%;
+    aspect-ratio: 4 / 3;
+    border-radius: 0.5rem;
+    object-fit: cover;
+}
+
+.form-container {
+    /* padding-top: 40px; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 18%;
+}
+
+input {
+    border: 1px solid rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.1);
+    color: white;
+}
+
+canvas {
+    cursor: crosshair;
+    border: 1px solid rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.hidden {
+    display: none;
+}
+
+/* THANKS */
+.thanks-container {
+    text-align: center;
+}
+
+/* SIGNERS */
+.signers-container {
+    background: rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border-top: 2px solid rgba(0, 0, 0, 0.3);
+}
+
+.signer {
+    border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+}
