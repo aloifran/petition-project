@@ -15,15 +15,8 @@ function getAllSignatures() {
 
 function getLastSignatureId() {
     return db
-        .query(`SELECT id FROM signatures ORDER BY id DESC LIMIT 1`)
+        .query(`SELECT id FROM signatures ORDER BY id DESC LIMIT 1;`)
         .then((data) => data.rows[0].id)
-        .catch((err) => console.log(console.log("Query error:", err)));
-}
-
-function getSignatureById(id) {
-    return db
-        .query(`SELECT signature FROM signatures where id=$1`, [id])
-        .then((data) => data.rows[0].signature)
         .catch((err) => console.log(console.log("Query error:", err)));
 }
 
@@ -47,10 +40,33 @@ function addUser(firstName, lastName, email, password) {
         .catch((err) => console.log(console.log("Query error:", err)));
 }
 
+function getLastUserId() {
+    return db
+        .query(`SELECT id FROM users ORDER BY id DESC LIMIT 1;`)
+        .then((data) => data.rows[0].id)
+        .catch((err) => console.log(console.log("Query error:", err)));
+}
+
+function getUserByEmail(email) {
+    return db
+        .query(`SELECT * FROM users WHERE email=$1`, [email])
+        .then((data) => data.rows[0])
+        .catch((err) => console.log(console.log("Query error:", err)));
+}
+
+// TODO: Find a way to create a general function by parameterizing the column name
+// function getUserBy(prop, val) {
+//     return db
+//         .query(`SELECT * FROM users WHERE $1 = $2 ;`, [prop, val])
+//         .then((data) => data.rows[0])
+//         .catch((err) => console.log(console.log("Query error:", err)));
+// }
+
 module.exports = {
     getAllSignatures,
     addSignature,
     getLastSignatureId,
-    getSignatureById,
     addUser,
+    getLastUserId,
+    getUserByEmail,
 };

@@ -85,8 +85,15 @@ app.get("/register", (req, res) => {
     res.render("register");
 });
 
+// move these vars somewhere else?
+let invalidCredentials;
 app.get("/login", (req, res) => {
-    res.render("login");
+    // PROVIDE OPTIONS FOR VALIDATION
+    // create one message for validation, instead of specific.
+    // For security reasons we dont want to show which field is wrong
+    res.render("login", {
+        invalidCredentials: invalidCredentials,
+    });
 });
 
 app.get("*", (req, res) => {
@@ -96,23 +103,59 @@ app.get("*", (req, res) => {
 // POST ROUTES --------------------------------------------
 
 app.post("/register", (req, res) => {
-    // Get user data
     const { firstName, lastName, email, password } = req.body;
 
-    // Hash the password before saving to the Database
-    encrypt.hash(password).then((hashedPwd) => {
-        db.addUser(firstName, lastName, email, hashedPwd).then(() => {
-            // Save userId in a cookie if query is succesfull
-            // then
-            // redirect to petition for now
+    // Hash the password before saving to DB
+    encrypt
+        .hash(password)
+        .then((hashedPwd) => {
+            db.addUser(firstName, lastName, email, hashedPwd);
+        })
+        // Save userId in a cookie
+        .then(() => db.getLastUserId())
+        .then((id) => {
+            console.log("Register: new user id", id);
+            req.session.userId = id;
             res.redirect("/petition");
         });
-    });
 });
 
 app.post("/login", (req, res) => {
-    // compare stored pass with login provided pass
-    // encrypt.compare(pass);
+    const { email, password } = req.body;
+    // in case of invalid email & pass, render validation page
+    // params to pass to the HB template
+
+    // validate email
+    db.getUserByEmail(email).then((usr) => {
+        if (usr) {
+            invalidCredentials = false;
+
+            // validate password
+            encrypt.compare(password, usr.password).then((match) => {
+                if (match === true) {
+                    // save userId in a cookie
+                    // req.session.userId = id;
+
+                    // validate if they already signed petition
+                    // query to signatures
+                    // save signatureId in a cookie
+                    // req.session.signatureId = id;
+                    // res.redirect("/thanks");
+
+                    invalidCredentials = false;
+                    res.redirect("/petition");
+                } else {
+                    console.log("Login: invalid password:", password);
+                    invalidCredentials = true;
+                    res.redirect("/login");
+                }
+            });
+        } else {
+            console.log("Login: invalid email:", email);
+            invalidCredentials = true;
+            res.redirect("/login");
+        }
+    });
 });
 
 app.post("/sign", (req, res) => {

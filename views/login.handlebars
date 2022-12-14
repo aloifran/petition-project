@@ -1,14 +1,16 @@
 <h1>Welcome back</h1>
 <section class="form-container">
+    {{#if invalidCredentials}}
+        <h3>No user was found with this email and password</h3>
+    {{/if}}
     <form action="/login" method="post">
-    <form action="" method="">
         <label for="email">
             Email Address
             <input required type="text" name="email" />
         </label>
-        <label for="pass">
+        <label for="password">
             Password
-            <input required type="text" name="pass" />
+            <input required type="text" name="password" />
         </label>
         <button>Log in</button>
     </form>
