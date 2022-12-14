@@ -37,6 +37,10 @@ app.get("/", (req, res) => {
     res.redirect("/petition");
 });
 
+// TODO: implement logic to validate usr
+// usr exists? NO => /register
+// usr exists? YES not logged in? => /login
+// usr exists? YES is logged in? => /petition
 app.get("/petition", (req, res) => {
     res.render("petition");
 });
@@ -54,7 +58,7 @@ app.get("/thanks", (req, res) => {
         });
     } else {
         db.getAllSignatures().then((signatures) => {
-            // get last signature, pass values
+            // CANVAS RELATED
             const lastSignatureCode = signatures.find(
                 (s) => s.id === req.session.signatureId
             ).signature;
@@ -85,12 +89,10 @@ app.get("/register", (req, res) => {
     res.render("register");
 });
 
-// move these vars somewhere else?
+// move this var somewhere else?
 let invalidCredentials;
 app.get("/login", (req, res) => {
     // PROVIDE OPTIONS FOR VALIDATION
-    // create one message for validation, instead of specific.
-    // For security reasons we dont want to show which field is wrong
     res.render("login", {
         invalidCredentials: invalidCredentials,
     });
@@ -104,17 +106,14 @@ app.get("*", (req, res) => {
 
 app.post("/register", (req, res) => {
     const { firstName, lastName, email, password } = req.body;
-
     // Hash the password before saving to DB
     encrypt
         .hash(password)
-        .then((hashedPwd) => {
-            db.addUser(firstName, lastName, email, hashedPwd);
-        })
+        .then((hashedPwd) => db.addUser(firstName, lastName, email, hashedPwd))
         // Save userId in a cookie
         .then(() => db.getLastUserId())
         .then((id) => {
-            console.log("Register: new user id", id);
+            console.log("Register: user id", id);
             req.session.userId = id;
             res.redirect("/petition");
         });
@@ -122,28 +121,27 @@ app.post("/register", (req, res) => {
 
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
-    // in case of invalid email & pass, render validation page
-    // params to pass to the HB template
-
     // validate email
     db.getUserByEmail(email).then((usr) => {
         if (usr) {
             invalidCredentials = false;
-
             // validate password
             encrypt.compare(password, usr.password).then((match) => {
                 if (match === true) {
-                    // save userId in a cookie
-                    // req.session.userId = id;
-
-                    // validate if they already signed petition
-                    // query to signatures
-                    // save signatureId in a cookie
-                    // req.session.signatureId = id;
-                    // res.redirect("/thanks");
-
                     invalidCredentials = false;
-                    res.redirect("/petition");
+
+                    // save userId in a cookie
+                    req.session.userId = usr.id;
+                    // validate if they already signed petition
+                    // save signatureId in a cookie
+                    db.getSignatureByUserId(usr.id).then((signature) => {
+                        if (signature) {
+                            req.session.signatureId = signature.id;
+                            res.redirect("/thanks");
+                        } else {
+                            res.redirect("/petition");
+                        }
+                    });
                 } else {
                     console.log("Login: invalid password:", password);
                     invalidCredentials = true;
@@ -159,15 +157,17 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/sign", (req, res) => {
-    const { firstName, lastName, signature } = req.body;
+    const { signature } = req.body;
+    // if usr is here, it already has a cookie set
+    const userId = req.session.userId;
 
-    db.addSignature(firstName, lastName, signature)
+    db.addSignature(userId, signature)
         .then(() => db.getLastSignatureId())
-        .then((id) => {
-            // save cookie with new signature id
-            req.session.signatureId = id;
-        })
-        .then(() => res.redirect("/thanks"));
+        .then((sigId) => {
+            // save cookie with signature id
+            req.session.signatureId = sigId;
+            res.redirect("/thanks");
+        });
 });
 
 app.listen(8081, () => console.log("Server running on port 8081"));

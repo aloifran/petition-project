@@ -33,24 +33,30 @@ h1 {
 }
 
 .form-container {
-    /* padding-top: 40px; */
+    padding-top: 40px;
     display: flex;
     flex-direction: column;
-    align-items: center;
     text-align: center;
 }
 
 form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    width: 18%;
+    gap: 10px;
+    align-items: center;
+    text-align: center;
 }
 
 input {
     border: 1px solid rgb(0, 0, 0);
     background: rgba(0, 0, 0, 0.1);
     color: white;
+}
+
+button {
+    box-shadow: 0 0 10px rgb(70, 0, 0);
+    font-family: "Poppins", sans-serif;
+    padding: 0 10px;
 }
 
 canvas {

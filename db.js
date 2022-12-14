@@ -3,9 +3,19 @@ const { USER, PASS } = process.env;
 const pg = require("spiced-pg");
 const db = pg(`postgres:${USER}:${PASS}@localhost:5432/petition`);
 
+// query is a promise, return it, so it can be chained with then()
+
 // SIGNATURES -------------------------------------
 
-// query is a promise, return it, so it can be chained with then() in the server
+function addSignature(userId, signature) {
+    return db
+        .query(`INSERT INTO signatures (user_id, signature) VALUES ($1, $2);`, [
+            userId,
+            signature,
+        ])
+        .catch((err) => console.log(console.log("Query error:", err)));
+}
+
 function getAllSignatures() {
     return db
         .query(`SELECT * FROM signatures ORDER BY id DESC;`)
@@ -20,12 +30,10 @@ function getLastSignatureId() {
         .catch((err) => console.log(console.log("Query error:", err)));
 }
 
-function addSignature(firstName, lastName, signature) {
+function getSignatureByUserId(userId) {
     return db
-        .query(
-            `INSERT INTO signatures (firstname, lastname, signature) VALUES ($1, $2, $3);`,
-            [firstName, lastName, signature]
-        )
+        .query(`SELECT * FROM signatures WHERE user_id=$1`, [userId])
+        .then((data) => data.rows[0])
         .catch((err) => console.log(console.log("Query error:", err)));
 }
 
@@ -54,18 +62,11 @@ function getUserByEmail(email) {
         .catch((err) => console.log(console.log("Query error:", err)));
 }
 
-// TODO: Find a way to create a general function by parameterizing the column name
-// function getUserBy(prop, val) {
-//     return db
-//         .query(`SELECT * FROM users WHERE $1 = $2 ;`, [prop, val])
-//         .then((data) => data.rows[0])
-//         .catch((err) => console.log(console.log("Query error:", err)));
-// }
-
 module.exports = {
-    getAllSignatures,
     addSignature,
+    getAllSignatures,
     getLastSignatureId,
+    getSignatureByUserId,
     addUser,
     getLastUserId,
     getUserByEmail,

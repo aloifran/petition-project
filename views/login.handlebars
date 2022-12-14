@@ -1,7 +1,7 @@
-<h1>Welcome back</h1>
+<h1>Welcome</h1>
 <section class="form-container">
     {{#if invalidCredentials}}
-        <h3>No user was found with this email and password</h3>
+        <h3>No user was found with this email and password.</h3>
     {{/if}}
     <form action="/login" method="post">
         <label for="email">
@@ -14,4 +14,5 @@
         </label>
         <button>Log in</button>
     </form>
+    <p>If you are not a member yet, please <a href="/register">sign up</a></p>
 </section>
