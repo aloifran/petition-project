@@ -1,7 +1,7 @@
 -- USE THIS FILE ONLY TO RECREATE DB
-
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS signatures;
+DROP TABLE IF EXISTS user_profiles;
 
 CREATE TABLE users(
     id SERIAL PRIMARY KEY,
@@ -16,5 +16,14 @@ CREATE TABLE signatures (
     id SERIAL primary key,
     user_id INTEGER NOT NULL REFERENCES users(id),
     signature VARCHAR NOT NULL,
+    created_at TIMESTAMP DEFAULT current_timestamp
+);
+
+CREATE TABLE user_profiles (
+    id SERIAL primary key,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    city VARCHAR(255),
+    age VARCHAR(255),
+    homepage VARCHAR(255),
     created_at TIMESTAMP DEFAULT current_timestamp
 );

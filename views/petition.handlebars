@@ -28,25 +28,21 @@
             to have a day of rest.
         </p>
         <p>
-            In conclusion, we urge you to join us in our campaign to keep spätis
-            open on Sundays. This simple change would greatly benefit our
-            community and would be greatly appreciated. Please sign our petition
-            and share it with your friends and family to show your support.
-            Thank you for your support.
+            Join us in our campaign to keep spätis open on Sundays! Please sign
+            our petition and share it with your friends and family to show your
+            support. Thank you!
         </p>
     </section>
 
     <section class="form-container">
-        <p><a href="/login">Log in</a></p>
-        <p><a href="/register">Sign up</a></p>
-
         <form action="/sign" method="post">
             <label for="signature">
-                Please sign here
+                You can sign here
                 <canvas height="100px"></canvas>
                 <input required class="hidden" type="text" name="signature" />
             </label>
             <button>Submit</button>
+            <p><a href="/signers">{{count}} others have already signed</a></p>
         </form>
     </section>
 </section>

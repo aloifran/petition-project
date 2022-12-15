@@ -18,7 +18,7 @@ h1 {
 }
 
 .description {
-    margin: 2rem;
+    margin: 2rem 1rem;
     width: 60%;
     display: flex;
     flex-direction: column;
@@ -28,15 +28,23 @@ h1 {
 .description img {
     width: 75%;
     aspect-ratio: 4 / 3;
-    border-radius: 0.5rem;
     object-fit: cover;
+    border-radius: 0.5rem;
+}
+
+canvas {
+    margin: 10px 0;
+    border-radius: 0.5rem;
 }
 
 .form-container {
-    padding-top: 40px;
     display: flex;
     flex-direction: column;
     text-align: center;
+}
+
+.petition .form-container {
+    margin: 4rem 1rem;
 }
 
 form {
@@ -44,7 +52,18 @@ form {
     flex-direction: column;
     gap: 10px;
     align-items: center;
-    text-align: center;
+}
+
+.petition form {
+    max-width: 440px;
+}
+
+.form-fields {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 20px 0;
+    gap: 10px;
 }
 
 input {
@@ -56,7 +75,7 @@ input {
 button {
     box-shadow: 0 0 10px rgb(70, 0, 0);
     font-family: "Poppins", sans-serif;
-    padding: 0 10px;
+    padding: 0 20px;
 }
 
 canvas {

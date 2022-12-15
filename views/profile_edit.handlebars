@@ -1,7 +1,7 @@
-<h1>Sign up</h1>
+<h1>Profile</h1>
 
 <section class="form-container">
-    <form action="/register" method="post">
+    <form action="/profile_edit" method="post">
         <div class="form-fields">
             <label for="firstName">
                 First Name
@@ -19,8 +19,19 @@
                 Password
                 <input required type="text" name="password" />
             </label>
+            <label for="age">
+                Age
+                <input type="text" name="age" />
+            </label>
+            <label for="city">
+                City
+                <input type="text" name="city" />
+            </label>
+            <label for="homepage">
+                Homepage
+                <input type="text" name="homepage" />
+            </label>
         </div>
-        <button>Continue</button>
+        <button>Save changes</button>
     </form>
-    <p>If you are already a member, please <a href="/login">log in</a></p>
 </section>

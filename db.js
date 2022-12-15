@@ -62,6 +62,19 @@ function getUserByEmail(email) {
         .catch((err) => console.log(console.log("Query error:", err)));
 }
 
+// USER PROFILES ---------------------------------
+
+function addUserProfile(userId, city, age, homepage) {
+    return db
+        .query(
+            `INSERT INTO user_profiles (user_id, city, age, homepage) VALUES ($1, $2, $3, $4)`,
+            [userId, city, age, homepage]
+        )
+        .catch((err) => console.log(console.log("Query error:", err)));
+}
+
+function updateUserProfile() {}
+
 module.exports = {
     addSignature,
     getAllSignatures,
@@ -70,4 +83,6 @@ module.exports = {
     addUser,
     getLastUserId,
     getUserByEmail,
+    addUserProfile,
+    updateUserProfile,
 };

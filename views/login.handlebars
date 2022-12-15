@@ -1,17 +1,20 @@
 <h1>Welcome</h1>
 <section class="form-container">
+    <h3>Please log in</h3>
     {{#if invalidCredentials}}
         <h3>No user was found with this email and password.</h3>
     {{/if}}
     <form action="/login" method="post">
-        <label for="email">
-            Email Address
-            <input required type="text" name="email" />
-        </label>
-        <label for="password">
-            Password
-            <input required type="text" name="password" />
-        </label>
+        <div class="form-fields">
+            <label for="email">
+                Email Address
+                <input required type="text" name="email" />
+            </label>
+            <label for="password">
+                Password
+                <input required type="text" name="password" />
+            </label>
+        </div>
         <button>Log in</button>
     </form>
     <p>If you are not a member yet, please <a href="/register">sign up</a></p>

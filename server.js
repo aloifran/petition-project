@@ -37,18 +37,21 @@ app.get("/", (req, res) => {
     res.redirect("/petition");
 });
 
-// TODO: implement logic to validate usr
-// usr exists? NO => /register
-// usr exists? YES not logged in? => /login
-// usr exists? YES is logged in? => /petition
 app.get("/petition", (req, res) => {
-    res.render("petition");
+    // is usr logged in?
+    if (req.session.userId) {
+        db.getAllSignatures().then((signatures) => {
+            res.render("petition", {
+                count: signatures.length,
+            });
+        });
+    } else {
+        res.redirect("/login");
+    }
 });
 
 app.get("/thanks", (req, res) => {
-    // require cookie
     console.log(req.session);
-
     // cookie validation
     if (!req.session.signatureId) {
         db.getLastSignatureId().then((id) => {
@@ -71,6 +74,7 @@ app.get("/thanks", (req, res) => {
     }
 });
 
+// Now get user data from users and user_profiles to display names & city
 app.get("/signers", (req, res) => {
     db.getAllSignatures().then((signatures) => {
         res.render("signers", {
@@ -92,10 +96,19 @@ app.get("/register", (req, res) => {
 // move this var somewhere else?
 let invalidCredentials;
 app.get("/login", (req, res) => {
-    // PROVIDE OPTIONS FOR VALIDATION
     res.render("login", {
         invalidCredentials: invalidCredentials,
     });
+});
+
+app.get("/profile", (req, res) => {
+    res.render("profile");
+});
+
+app.get("/profile_edit", (req, res) => {
+    // create new handlebars view with all user fields including names and pass
+    res.render("profile_edit");
+    // query user data to show up in default value fields
 });
 
 app.get("*", (req, res) => {
@@ -106,16 +119,18 @@ app.get("*", (req, res) => {
 
 app.post("/register", (req, res) => {
     const { firstName, lastName, email, password } = req.body;
-    // Hash the password before saving to DB
+    // Hash password before storing
     encrypt
         .hash(password)
         .then((hashedPwd) => db.addUser(firstName, lastName, email, hashedPwd))
         // Save userId in a cookie
+        // OR save firstName lastName into a user obj in the cookie. Where do we need it later?
         .then(() => db.getLastUserId())
         .then((id) => {
             console.log("Register: user id", id);
             req.session.userId = id;
-            res.redirect("/petition");
+            // After register -> profile
+            res.redirect("/profile");
         });
 });
 
@@ -157,17 +172,23 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/sign", (req, res) => {
+    // if usr is here, it's already logged in
     const { signature } = req.body;
-    // if usr is here, it already has a cookie set
-    const userId = req.session.userId;
 
-    db.addSignature(userId, signature)
-        .then(() => db.getLastSignatureId())
-        .then((sigId) => {
-            // save cookie with signature id
-            req.session.signatureId = sigId;
-            res.redirect("/thanks");
-        });
+    db.addSignature(req.session.userId, signature).then(() => {
+        // save cookie with signed=true, refactor logic to validate if signed
+        req.session.signed = true;
+        res.redirect("/thanks");
+    });
+});
+
+// Make insert query to user_profiles
+app.post("/profile", (req, res) => {
+    const { city, age, homepage } = req.body;
+    // insert query with optional fields, then in /edit make an update for optional fields
+    db.addUserProfile(req.session.userId, city, age, homepage).then(() => {
+        res.redirect("/petition");
+    });
 });
 
 app.listen(process.env.PORT || 8081, () =>
