@@ -38,3 +38,5 @@ function getMousePos(canvas, ev) {
         y: ev.clientY - rect.top,
     };
 }
+
+// ADD LISTENER FOR DELETE SIGNATURE button, ASKING ARE YOU SURE?
