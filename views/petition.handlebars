@@ -36,14 +36,32 @@
 
     <section class="form-container">
         <form action="/sign" method="post">
-            <label for="signature">
-                You can sign here
-                <canvas height="100px"></canvas>
-                <input required class="hidden" type="text" name="signature" />
-            </label>
-            <button>Submit</button>
-            <p><a href="/signers">{{count}} others have already signed</a></p>
+            {{#if signed}}
+                <h3>Thanks for signing!</h3>
+                <img src="{{signature}}" alt="signature" />
+            {{else}}
+                <label for="signature">
+                    You can sign here
+                    <canvas height="100px"></canvas>
+                    <input
+                        required
+                        class="hidden"
+                        type="text"
+                        name="signature"
+                    />
+                </label>
+                <button>Submit</button>
+            {{/if}}
+            <p><a href="/signers">See all {{count}} signers</a></p>
+            <p><a href="/profile_edit">Edit your profile</a></p>
         </form>
+        {{#if signed}}
+            <form action="/unsign" method="post">
+                <p>
+                    <button class="button-link">Delete your signature</button>
+                </p>
+            </form>
+        {{/if}}
     </section>
 </section>
-<script src="canvas.js"></script>
+<script src="main.js"></script>

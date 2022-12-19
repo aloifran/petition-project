@@ -5,31 +5,63 @@
         <div class="form-fields">
             <label for="firstName">
                 First Name
-                <input required type="text" name="firstName" />
+                <input
+                    type="text"
+                    name="firstName"
+                    {{#if userData.firstname}}
+                    value={{userData.firstname}}
+                    {{/if}}
+                />
             </label>
             <label for="lastName">
                 Last Name
-                <input required type="text" name="lastName" />
+                <input
+                    type="text"
+                    name="lastName"
+                    {{#if userData.lastname}}
+                    value={{userData.lastname}}
+                    {{/if}}
+                />
             </label>
             <label for="email">
                 Email
-                <input required type="text" name="email" />
+                <input 
+                    type="text"
+                    name="email"
+                    {{#if userData.email}}
+                    value={{userData.email}}
+                    {{/if}}
+                />
             </label>
             <label for="pass">
                 Password
-                <input required type="text" name="password" />
+                <input type="text" name="password" />
             </label>
             <label for="age">
                 Age
-                <input type="text" name="age" />
+                <input type="text" name="age" 
+                {{#if userData.age}}
+                value={{userData.age}}
+                {{/if}}
+                />
             </label>
             <label for="city">
                 City
-                <input type="text" name="city" />
+                <input type="text" name="city" 
+                {{#if userData.city}}
+                value={{userData.city}}
+                {{/if}}
+                 />
             </label>
             <label for="homepage">
                 Homepage
-                <input type="text" name="homepage" />
+                <input
+                    type="text"
+                    name="homepage"
+                    {{#if userData.homepage}}
+                    value={{userData.homepage}}
+                    {{/if}}
+                />
             </label>
         </div>
         <button>Save changes</button>

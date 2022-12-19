@@ -3,5 +3,12 @@
 <section class="thanks-container">
     <p>Thanks for taking the time to sign.</p>
     <img src="{{signature}}" alt="signature" />
-    <p><a href="/signers">{{count}} others have signed</a></p>
+    <p><a href="/signers">See all {{count}} signers</a></p>
+    <p><a href="/profile_edit">Edit your profile</a></p>
+    <form action="/unsign" method="post">
+        <p>
+            <button class="button-link">Delete your signature</button>
+        </p>
+    </form>
+
 </section>
