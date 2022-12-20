@@ -47,17 +47,17 @@ app.get("/", (req, res) => {
 });
 
 app.get("/petition", (req, res) => {
-    let handSignature;
-    if (req.session.signed === true) {
-        db.getUserSignature(req.session.userId).then((signature) => {
-            handSignature = signature.signature;
-        });
-    }
     db.getAllSignatures().then((signatures) => {
-        res.render("petition", {
-            count: signatures.length,
-            signed: req.session.signed,
-            signature: handSignature,
+        db.getUserSignature(req.session.userId).then((data) => {
+            let handSignature;
+            if (req.session.signed) {
+                handSignature = data.signature;
+            }
+            res.render("petition", {
+                count: signatures.length,
+                signed: req.session.signed,
+                signature: handSignature,
+            });
         });
     });
 });
