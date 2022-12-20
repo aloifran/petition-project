@@ -1,7 +1,7 @@
 require("dotenv").config();
-const { USER, PASS } = process.env;
+const { DATABASE_URL } = process.env;
 const pg = require("spiced-pg");
-const db = pg(`postgres:${USER}:${PASS}@localhost:5432/petition`);
+const db = pg(DATABASE_URL);
 
 // query is a promise, return it, so it can be chained with then()
 

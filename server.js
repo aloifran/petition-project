@@ -159,7 +159,7 @@ app.post("/login", (req, res) => {
                 if (match) {
                     invalidCredentials = false;
                     req.session.userId = user.id;
-                    console.log("Log in: user", user);
+                    console.log("Log in: user id", user.id);
 
                     if (user.signature) {
                         req.session.signed = true;
