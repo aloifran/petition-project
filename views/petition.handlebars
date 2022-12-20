@@ -56,12 +56,11 @@
             <p><a href="/profile_edit">Edit your profile</a></p>
         </form>
         {{#if signed}}
-            <form action="/unsign" method="post">
-                <p>
-                    <button class="button-link">Delete your signature</button>
-                </p>
-            </form>
+            <p><button id="unsign-btn" class="btn-link">Delete your signature</button></p>
         {{/if}}
+         <form action="/logout" method="post">
+         <p><button class="btn-link">Log out</button></p>
+        </form> 
     </section>
 </section>
-<script src="main.js"></script>
+        {{> popUp}}
