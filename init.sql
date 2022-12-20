@@ -14,7 +14,7 @@ CREATE TABLE users(
 
 CREATE TABLE signatures (
     id SERIAL primary key,
-    user_id INTEGER NOT NULL REFERENCES users(id),
+    user_id INTEGER NOT NULL UNIQUE REFERENCES users(id),
     signature VARCHAR NOT NULL,
     created_at TIMESTAMP DEFAULT current_timestamp
 );

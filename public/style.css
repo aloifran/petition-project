@@ -46,7 +46,7 @@ a {
     text-decoration: unset;
 }
 
-.button-link {
+.btn-link {
     color: rgb(103, 255, 247);
     text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
     border: 0;
@@ -56,7 +56,7 @@ a {
     cursor: pointer;
 }
 
-.button-link:hover,
+.btn-link:hover,
 a:hover {
     color: rgb(255, 217, 27);
     font-weight: 500;
@@ -102,6 +102,32 @@ input {
     border: 1px solid rgb(0, 0, 0);
     background: rgba(0, 0, 0, 0.1);
     color: white;
+}
+
+.popUp {
+    background: rgba(0, 0, 0, 0.8);
+    text-shadow: 1px 1px 1px rgb(255, 0, 51);
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 0.5rem;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    height: 120px;
+    width: 420px;
+    top: 25%;
+    left: 25%;
+}
+
+.popUpChild {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+#unsignForm {
+    flex-direction: row;
+    margin: 0;
 }
 
 .hidden {

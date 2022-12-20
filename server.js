@@ -5,6 +5,11 @@ const express = require("express");
 const app = express();
 const db = require("./db");
 const encrypt = require("./encrypt");
+const {
+    requireLoggedInUser,
+    requireLoggedOutUser,
+    requireSignature,
+} = require("./middleware");
 
 // pretty date setup
 const TimeAgo = require("javascript-time-ago");
@@ -32,52 +37,42 @@ app.use(express.static("./public"));
 const parseBody = express.urlencoded({ extended: false });
 app.use(parseBody);
 
-// GET ROUTES --------------------------------------------
+// MIDDLEWARE --------------------------------------------
+app.use(requireLoggedInUser);
+app.use(requireLoggedOutUser);
 
+// GET ROUTES --------------------------------------------
 app.get("/", (req, res) => {
     res.redirect("/petition");
 });
 
 app.get("/petition", (req, res) => {
-    // is usr logged in?
-    if (req.session.userId) {
-        // Show canvas
-        let usrSignature;
-        if (req.session.signed) {
-            db.getUserSignature(req.session.userId).then((signature) => {
-                usrSignature = signature.signature;
-            });
-        }
-        db.getAllSignatures().then((signatures) => {
-            res.render("petition", {
-                count: signatures.length,
-                signed: req.session.signed,
-                signature: usrSignature,
-            });
+    let handSignature;
+    if (req.session.signed === true) {
+        db.getUserSignature(req.session.userId).then((signature) => {
+            handSignature = signature.signature;
         });
-    } else {
-        res.redirect("/login");
     }
+    db.getAllSignatures().then((signatures) => {
+        res.render("petition", {
+            count: signatures.length,
+            signed: req.session.signed,
+            signature: handSignature,
+        });
+    });
 });
 
-app.get("/thanks", (req, res) => {
-    console.log(req.session);
+app.get("/thanks", requireSignature, (req, res) => {
+    db.getAllSignatures().then((signatures) => {
+        const handSignature = signatures.find(
+            (s) => s.user_id === req.session.userId
+        ).signature;
 
-    if (!req.session.signed) {
-        res.redirect("/petition");
-    } else {
-        db.getAllSignatures().then((signatures) => {
-            // canvas
-            const usrSignature = signatures.find(
-                (s) => s.user_id === req.session.userId
-            ).signature;
-
-            res.render("thanks", {
-                count: signatures.length,
-                signature: usrSignature,
-            });
+        res.render("thanks", {
+            count: signatures.length,
+            signature: handSignature,
         });
-    }
+    });
 });
 
 app.get("/signers", (req, res) => {
@@ -96,7 +91,6 @@ app.get("/signers", (req, res) => {
 
 app.get("/signers_:signerCity", (req, res) => {
     const signerCity = req.params.signerCity;
-
     db.getSignersData().then((signers) => {
         const signersFromCity = signers.filter(
             (signer) => signer.city === signerCity
@@ -132,8 +126,6 @@ app.get("/profile", (req, res) => {
 
 app.get("/profile_edit", (req, res) => {
     db.getUserData(req.session.userId).then((userData) => {
-        req.session.user = userData;
-
         res.render("profile_edit", {
             userData: userData,
         });
@@ -145,15 +137,11 @@ app.get("*", (req, res) => {
 });
 
 // POST ROUTES --------------------------------------------
-
 app.post("/register", (req, res) => {
     const { firstName, lastName, email, password } = req.body;
-    // Hash password before storing
     encrypt
         .hash(password)
         .then((hashedPwd) => db.addUser(firstName, lastName, email, hashedPwd))
-        // Save userId in a cookie
-        // OR save firstName lastName into a user obj in the cookie. Where do we need it later?
         .then(() => db.getLastUserId())
         .then((id) => {
             console.log("Register: user id", id);
@@ -164,31 +152,27 @@ app.post("/register", (req, res) => {
 
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
-    // validate email
-    db.getUserByEmail(email).then((usr) => {
-        if (usr) {
+    db.getUserByEmail(email).then((user) => {
+        if (user) {
             invalidCredentials = false;
-            // validate password
-            encrypt.compare(password, usr.password).then((match) => {
-                if (match === true) {
+            encrypt.compare(password, user.password).then((match) => {
+                if (match) {
                     invalidCredentials = false;
-                    // save userId in a cookie
-                    req.session.userId = usr.id;
-                    // validate if they already signed petition
-                    if (req.session.signed === true) {
-                        if (req.session.signed === true);
+                    req.session.userId = user.id;
+                    console.log("Log in: user", user);
+
+                    if (user.signature) {
+                        req.session.signed = true;
                         res.redirect("/thanks");
                     } else {
                         res.redirect("/petition");
                     }
                 } else {
-                    console.log("Login: invalid password:", password);
                     invalidCredentials = true;
                     res.redirect("/login");
                 }
             });
         } else {
-            console.log("Login: invalid email:", email);
             invalidCredentials = true;
             res.redirect("/login");
         }
@@ -196,102 +180,71 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/sign", (req, res) => {
-    // if usr is here, it's already logged in
     const { signature } = req.body;
-
     db.addSignature(req.session.userId, signature).then(() => {
-        // save cookie with signed=true
         req.session.signed = true;
         res.redirect("/thanks");
     });
 });
 
-// TODO: Add a pop up asking , are you sure? maybe in browser js
 app.post("/unsign", (req, res) => {
     db.removeUserSignature(req.session.userId).then(() => {
-        // unsign from session
         req.session.signed = false;
-        // redirect
         res.redirect("/");
     });
 });
 
 app.post("/profile", (req, res) => {
     const { city, age, homepage } = req.body;
-    // insert query with optional fields, then in /edit make an update for optional fields
     db.addUserProfile(req.session.userId, city, age, homepage).then(() => {
         res.redirect("/petition");
     });
 });
 
 app.post("/profile_edit", (req, res) => {
-    // user data from session
-    const {
-        firstname: firstNameDb,
-        lastname: lastNameDb,
-        email: emailDb,
-        password: passDb,
-        city: cityDb,
-        age: ageDb,
-        homepage: homepageDb,
-    } = req.session.user;
+    let userDb;
+    db.getUserData(req.session.userId).then((data) => {
+        userDb = data;
+    });
 
-    // user data from body
-    const {
-        firstName: firstNameEdit,
-        lastName: lastNameEdit,
-        email: emailEdit,
-        password: passEdit,
-        age: ageEdit,
-        city: cityEdit,
-        homepage: homepageEdit,
-    } = req.body;
+    const { firstName, lastName, email, password, age, city, homepage } =
+        req.body;
 
-    // validate user fields
-    if (
-        firstNameDb !== firstNameEdit ||
-        lastNameDb !== lastNameEdit ||
-        emailDb !== emailEdit
-    ) {
-        db.updateUser(
-            firstNameEdit,
-            lastNameEdit,
-            emailEdit,
-            req.session.userId
-        ).then(() => console.log("UPDATED USER"));
-    }
+    // update user profile without validation
+    db.updateUserProfile(city, age, homepage, req.session.userId)
+        .then(() => {
+            console.log("UPDATED NON MANDATORY FIELDS");
+            // validate mandatory fields
+            if (
+                userDb.firstname !== firstName ||
+                userDb.lastname !== lastName ||
+                userDb.email !== email
+            ) {
+                return db
+                    .updateUser(firstName, lastName, email, req.session.userId)
+                    .then(() => console.log("UPDATED MANDATORY FIELDS"));
+            }
+        })
+        .then(() => {
+            // validate pass
+            if (password !== "") {
+                return encrypt
+                    .hash(password)
+                    .then((hashedPwd) =>
+                        db
+                            .updateUserPass(hashedPwd, req.session.userId)
+                            .then(() => console.log("UPDATED PASSWORD"))
+                    );
+            }
+        })
+        .then(() => {
+            res.redirect("/");
+        });
+});
 
-    // validate pass
-    if (passEdit !== "") {
-        // if pass was changed, hash it
-        encrypt
-            .hash(passEdit)
-            .then((hashedPwd) =>
-                db.updateUserPass(hashedPwd, req.session.userId)
-            )
-            .then(() => console.log("UPDATED USER PASSWORD"));
-    }
-
-    // validate user profile
-    if (
-        cityDb !== cityEdit ||
-        ageDb !== ageEdit ||
-        homepageDb !== homepageEdit
-    ) {
-        db.updateUserProfile(
-            cityEdit,
-            ageEdit,
-            homepageEdit,
-            req.session.userId
-        ).then(() => console.log("UPDATED USER PROFILE"));
-    }
-
-    // TODO: add redirect
-    // update user data in session after editing
-    // this should be the result of promises, cause if it fails, then it will store invalid data
-    db.getUserData(req.session.userId).then(
-        (userData) => (req.session.user = userData)
-    );
+app.post("/logout", (req, res) => {
+    req.session = null;
+    res.redirect("/login");
 });
 
 app.listen(process.env.PORT || 8081, () =>

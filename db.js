@@ -18,9 +18,7 @@ function addSignature(userId, signature) {
 
 function getAllSignatures() {
     return db
-        .query(
-            `SELECT * FROM signatures WHERE signature != '' ORDER BY id DESC;`
-        )
+        .query(`SELECT * FROM signatures ORDER BY id DESC;`)
         .then((data) => data.rows)
         .catch((err) => console.log(console.log("Query error:", err)));
 }
@@ -45,6 +43,22 @@ function removeUserSignature(userId) {
         .catch((err) => console.log(console.log("Query error:", err)));
 }
 
+// SIGNERS  ------------------------------------
+
+function getSignersData() {
+    return db
+        .query(
+            `SELECT firstname, lastname, age, city, homepage, signatures.created_at as signed_at
+            FROM users
+            JOIN user_profiles ON users.id = user_profiles.user_id
+            JOIN signatures ON users.id = signatures.user_id
+            WHERE signatures.signature != ''
+            ORDER BY signatures.created_at DESC;`
+        )
+        .then((data) => data.rows)
+        .catch((err) => console.log(console.log("Query error:", err)));
+}
+
 // USERS -------------------------------------
 
 function addUser(firstName, lastName, email, password) {
@@ -65,7 +79,12 @@ function getLastUserId() {
 
 function getUserByEmail(email) {
     return db
-        .query(`SELECT * FROM users WHERE email=$1;`, [email])
+        .query(
+            `SELECT users.id, firstname, lastname, email, password, users.created_at, signature
+             FROM users full outer join signatures ON users.id = signatures.user_id
+             WHERE email=$1;`,
+            [email]
+        )
         .then((data) => data.rows[0])
         .catch((err) => console.log(console.log("Query error:", err)));
 }
@@ -86,10 +105,11 @@ function updateUserPass(hash, userId) {
         .catch((err) => console.log(console.log("Query error:", err)));
 }
 
+// for profile edit
 function getUserData(id) {
     return db
         .query(
-            `SELECT firstname, lastname, email, password, city, age, homepage
+            `SELECT firstname, lastname, email, city, age, homepage
             FROM users
             JOIN user_profiles ON users.id = user_profiles.user_id
             WHERE users.id=$1;`,
@@ -116,22 +136,6 @@ function updateUserProfile(city, age, homepage, userId) {
             `UPDATE user_profiles SET city=$1, age=$2, homepage=$3 WHERE user_id=$4;`,
             [city, age, homepage, userId]
         )
-        .catch((err) => console.log(console.log("Query error:", err)));
-}
-
-// SIGNERS  ------------------------------------
-
-function getSignersData() {
-    return db
-        .query(
-            `SELECT firstname, lastname, age, city, homepage, signatures.created_at as signed_at
-            FROM users
-            JOIN user_profiles ON users.id = user_profiles.user_id
-            JOIN signatures ON users.id = signatures.user_id
-            WHERE signatures.signature != ''
-            ORDER BY users.id DESC;`
-        )
-        .then((data) => data.rows)
         .catch((err) => console.log(console.log("Query error:", err)));
 }
 
