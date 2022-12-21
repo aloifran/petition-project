@@ -196,9 +196,11 @@ app.post("/unsign", (req, res) => {
 
 app.post("/profile", (req, res) => {
     const { city, age, homepage } = req.body;
-    db.addUserProfile(req.session.userId, city, age, homepage).then(() => {
-        res.redirect("/petition");
-    });
+    db.addUserProfile(req.session.userId, city, age.toString(), homepage).then(
+        () => {
+            res.redirect("/petition");
+        }
+    );
 });
 
 app.post("/profile_edit", (req, res) => {
@@ -211,7 +213,7 @@ app.post("/profile_edit", (req, res) => {
         req.body;
 
     // update user profile without validation
-    db.updateUserProfile(city, age, homepage, req.session.userId)
+    db.updateUserProfile(city, age.toString(), homepage, req.session.userId)
         .then(() => {
             console.log("UPDATED NON MANDATORY FIELDS");
             // validate mandatory fields
