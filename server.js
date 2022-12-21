@@ -50,8 +50,10 @@ app.get("/petition", (req, res) => {
     db.getAllSignatures().then((signatures) => {
         db.getUserSignature(req.session.userId).then((data) => {
             let handSignature;
-            if (req.session.signed) {
-                handSignature = data.signature;
+            if (data) {
+                if (req.session.signed) {
+                    handSignature = data.signature;
+                }
             }
             res.render("petition", {
                 count: signatures.length,
