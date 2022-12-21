@@ -1,6 +1,9 @@
 <h1>Sign up</h1>
 
 <section class="form-container">
+    {{#if invalidCredentials}}
+        <h3>Email is already taken, please try a different one.</h3>
+    {{/if}}
     <form action="/register" method="post">
         <div class="form-fields">
             <label for="firstName">

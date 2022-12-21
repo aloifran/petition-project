@@ -108,12 +108,15 @@ app.get("/signers_:signerCity", (req, res) => {
     });
 });
 
-app.get("/register", (req, res) => {
-    res.render("register");
-});
-
 // move this var somewhere else?
 let invalidCredentials;
+
+app.get("/register", (req, res) => {
+    res.render("register", {
+        invalidCredentials: invalidCredentials,
+    });
+});
+
 app.get("/login", (req, res) => {
     res.render("login", {
         invalidCredentials: invalidCredentials,
@@ -139,15 +142,25 @@ app.get("*", (req, res) => {
 // POST ROUTES --------------------------------------------
 app.post("/register", (req, res) => {
     const { firstName, lastName, email, password } = req.body;
-    encrypt
-        .hash(password)
-        .then((hashedPwd) => db.addUser(firstName, lastName, email, hashedPwd))
-        .then(() => db.getLastUserId())
-        .then((id) => {
-            console.log("Register: user id", id);
-            req.session.userId = id;
-            res.redirect("/profile");
-        });
+    db.getUserByEmail(email).then((user) => {
+        if (user) {
+            invalidCredentials = true;
+            res.redirect("/register");
+        } else {
+            invalidCredentials = false;
+            encrypt
+                .hash(password)
+                .then((hashedPwd) =>
+                    db.addUser(firstName, lastName, email, hashedPwd)
+                )
+                .then(() => db.getLastUserId())
+                .then((id) => {
+                    console.log("Register: user id", id);
+                    req.session.userId = id;
+                    res.redirect("/profile");
+                });
+        }
+    });
 });
 
 app.post("/login", (req, res) => {
